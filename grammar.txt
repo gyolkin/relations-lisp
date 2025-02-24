@@ -1,0 +1,38 @@
+Start := Relations
+
+Relations := RelationDecl { "\n" RelationDecl }
+RelationDecl := IDENT "=" Relation
+
+Relation := RName
+          | RName "()"
+          | RName "(" Relation ")"
+          | RName "(" ("m"|"w") ")"                   - m/w применяется по отношению к RName
+          | RName "(" Relation "," ("m"|"w") ")"      - m/w применяется по отношению к RName
+
+Rname := IDENT | RelPrimitives
+RelPrimitives := "parent" | "child" | "spouse"
+
+IDENT - регулярка для переменной
+
+
+## EXAMPLES
+
+Mother = parent(w)
+Father = parent(m)
+
+Son      = child(m)
+Daughter = child(w)
+
+Husband = spouse()
+Wife    = spouse()
+
+Brother = Son(Mother) / Son(Father)
+Sister  = Daughter(Mother) / Daughter(Father)
+
+Grandmother   = parent(parent(), w) - бабушки по папиной и маминой линии
+GrandmotherM1 = parent(Mother, w)   - бабушка по маминой линии
+GrandmotherM2 = Mother(parent(w))   - бабушка по маминой линии
+GrandmotherM3 = Mother(Mother)      - бабушка по маминой линии
+
+CousinF = Son(Brother(parent))
+Cousins = child(Brother(Father))
