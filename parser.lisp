@@ -127,7 +127,7 @@
            (append (list fun-name) (list (concatenate 'string "?" arg)))                          ; parent(f)
            (if (and (equal sec "(") (equal last-el ")"))                                       ; parent(parent)
                (append (list arg) (list fun-name))
-               (error "Syntax error1: ~A" fun-name)))))
+               (error "Syntax error: ~A" tokens)))))
     ((> (length tokens) 4)                                          ; parent(Mother(), f) | parent(Mother())
      (let* ((fun-name (first tokens))
         (sec (second tokens))
@@ -139,8 +139,8 @@
            (append (parse-relation (subseq tokens 2 (- (length tokens) 3))) (list fun-name) (list (concatenate 'string "?" pred-last)))
            (if (equal pred-last ")")
                (append (parse-relation (subseq tokens 2 (- (length tokens) 1))) (list fun-name))
-               (error "Syntax error1: ~A" fun-name)))))
-    (t (error "Invalid relation syntax"))))
+               (error "Syntax error: ~A" tokens)))))
+    (t (error "Syntax error: ~A" tokens))))
 
 (defun parse-declaration (tokens)
   "Парсит определение отношения"
@@ -148,11 +148,11 @@
          (sec (second tokens))
          (relation-expr-tokens (cddr tokens))
          (base-fun (gethash fun-name *relations-hash-table*)))
-    (if (or (member fun-name *primitive-fun-names* :test 'equal) (not (equal sec "=")))
-        (error "Invalid syntax in relation declaration")
+    (if (or (member fun-name '("parents" "children" "spouse" "m" "f") :test 'equal) (not (equal sec "=")))
+        (error "Invalid syntax in relation declaration: ~A" tokens)
         (if (not base-fun)
             (setf (gethash fun-name *relations-hash-table*) (parse-relation relation-expr-tokens))
-            (error "Function with name ~A already exists" fun-name)))))
+            (error "Function with name \"~A\" already exists" fun-name)))))
 
 
 ;; Регулярные выражения для различных токенов
@@ -212,7 +212,7 @@
             (setf rels (funcall primitive-fun rels))
               (if inner-fun-list
                 (setf rels (recursive-process-relation rels inner-fun-list))
-                  (error "Function with name: ~A not exist" fun-list)))))
+                  (error "Function with name \"~A\" not exist" fun)))))
     (setf rels (remove-if (lambda (node) (member node *visited*)) rels))
 ;    (print "------")
 ;    (print-nodes rels)
@@ -235,7 +235,7 @@
         (let* ((nodes (recursive-process-relation (list node) (list first-fun))))
 ;          (print-nodes nodes)
 ;          (print fun-list)
-          (if (not (equal (length fun-list) 1)) (setf *visited* (list node)))
+          (if (not (equal (length fun-list) 1)) (setf *visited* nodes))
           (setf res-nodes (recursive-process-relation nodes (cdr fun-list)))))
 ;    (print res-nodes)
     (remove-duplicates res-nodes :test #'equal)))
