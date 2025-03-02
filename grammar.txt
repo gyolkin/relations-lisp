@@ -1,38 +1,15 @@
 Start := Relations
 
-Relations := RelationDecl { "\n" RelationDecl }
-RelationDecl := IDENT "=" Relation
+Relations := { COMMENT "\n" } RelationDecl { "\n" (RelationDecl|COMMENT) }
+RelationDecl := IDENT "=" Relation { COMMENT }
 
-Relation := RName
-          | RName "()"
-          | RName "(" Relation ")"
-          | RName "(" ("m"|"w") ")"                   - m/w применяется по отношению к RName
-          | RName "(" Relation "," ("m"|"w") ")"      - m/w применяется по отношению к RName
+Relation := FunName
+          | FunName "()"
+          | FunName "(" Relation ")"
+          | FunName "(" ("m"|"f") ")"                - m/f применяется по отношению к FunName
+          | FunName "(" Relation "," ("m"|"f") ")"   - m/f применяется по отношению к FunName
 
-Rname := IDENT | RelPrimitives
-RelPrimitives := "parent" | "child" | "spouse"
+FunName := IDENT | "spouse"| "parents" | "children"
 
-IDENT - регулярка для переменной
-
-
-## EXAMPLES
-
-Mother = parent(w)
-Father = parent(m)
-
-Son      = child(m)
-Daughter = child(w)
-
-Husband = spouse()
-Wife    = spouse()
-
-Brother = Son(Mother) / Son(Father)
-Sister  = Daughter(Mother) / Daughter(Father)
-
-Grandmother   = parent(parent(), w) - бабушки по папиной и маминой линии
-GrandmotherM1 = parent(Mother, w)   - бабушка по маминой линии
-GrandmotherM2 = Mother(parent(w))   - бабушка по маминой линии
-GrandmotherM3 = Mother(Mother)      - бабушка по маминой линии
-
-CousinF = Son(Brother(parent))
-Cousins = child(Brother(Father))
+IDENT - [a-zA-Zа-яА-Я_ё][a-zA-Z0-9а-яА-Я_ё]*
+COMMENT - ;.*
