@@ -1,0 +1,67 @@
+
+;Start := Relations
+;
+;Relations := { COMMENT "\n" } RelationDecl { "\n" (RelationDecl|COMMENT) }
+;RelationDecl := IDENT "=" Relation { COMMENT }
+;
+;Relation := FunName
+;          | FunName "()"
+;          | FunName "(" Relation ")"
+;          | FunName "(" ("m"|"f") ")"                - m/f применяется по отношению к FunName
+;          | FunName "(" Relation "," ("m"|"f") ")"   - m/f применяется по отношению к FunName
+;
+;FunName := IDENT | "spouse"| "parents" | "children"
+;
+;IDENT - [a-zA-Zа-яА-Я_ё][a-zA-Z0-9а-яА-Я_ё]*
+;COMMENT - ;.*
+
+; данный пример для родственных связей Вовы
+
+Mother = parents(f) ; Света
+Father = parents(m) ; Дима
+
+Husband = spouse(m) ; nil
+Wife = spouse(f) ; Даша
+Wife2 = spouse() ; Даша
+
+Son = children(m) ; Герман
+Daughter = children(f) ; Глаша
+
+Brother = children(parents, m) ; Гоша
+Sister = children(Father(), f) ; Алиса
+
+Grandfathers = Father(parents) ; Саша Иван
+Grandmothers = Mother(parents()) ; Инна Надя
+
+Grandfather_from_father_1 = Father(Father) ; Иван
+Grandfather_from_father_2 = Father(parents(m)) ; Иван
+Grandfather_from_father_3 = parents(parents(m), m) ; Иван
+
+Grandmother_from_mother = parents(Mother(), f) ; Инна
+
+Cousin = Son(Brother(Mother)) ; Илья
+
+Тесть = Father(Wife) ; Сергей
+Теща = Mother(Wife) ; Вера
+
+Свёкр = Father(Husband) ; nil
+Свекровь = Mother(Husband) ; nil
+
+Сваты_для_мужа = parents(Wife) ; Сергей Вера
+Сваты_для_жены = parents(Husband) ; nil
+
+Сноха = Wife(Son) ; Карина
+
+Невестка = Wife ; Даша
+Зять = spouse(Daughter) ; Семён
+
+Шурин = Brother(Wife) ; Антон
+Золовка = Sister(Husband) ; nil
+
+Деверь = Brother(Husband) ; nil
+Свояченица = Sister(Wife) ; Настя
+
+Свояк = Husband(Sister(Wife)) ; Коля (Хэнк)
+
+дядя = Brother(Mother) ; Витя
+крёстная = Daughter(Brother(Mother))
